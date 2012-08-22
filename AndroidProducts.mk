@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/pico.mk
+    $(LOCAL_DIR)/device_pico.mk
