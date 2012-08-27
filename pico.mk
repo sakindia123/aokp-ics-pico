@@ -15,9 +15,8 @@
 # proprietary side of the device
 # Inherit from those products. Most specific first
 
-$(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
-DEVICE_PACKAGE_OVERLAYS += device/htc/pico/overlay
+# We havent decided what props we need,yet
+# $(call inherit-product-if-exists, vendor/htc/pico/pico-vendor.mk)
 
 # Video decoding
 PRODUCT_PACKAGES += \
@@ -28,14 +27,11 @@ PRODUCT_PACKAGES += \
     
 # Graphics 
 PRODUCT_PACKAGES += \
-    gralloc.msm7x27a \
     copybit.msm7x27a \
+    gralloc.msm7x27a \
     hwcomposer.msm7x27a \
     libtilerenderer \
-    libgenlock \
-    liboverlay \
-    libQcomUI \
-    libmemalloc
+    libQcomUI
     
 # Audio
 PRODUCT_PACKAGES += \
@@ -54,7 +50,7 @@ PRODUCT_PACKAGES += \
     
 # Camera
 PRODUCT_PACKAGES += \
-    camera.msm7x27a    
+    camera.default    
     
 # Misc
 PRODUCT_PACKAGES += \
@@ -76,17 +72,43 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
     frameworks/base/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
     frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
-    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
+    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml    
+
 # Init
 PRODUCT_COPY_FILES += \
     device/htc/pico/files/init.pico.rc:root/init.pico.rc \
     device/htc/pico/files/ueventd.pico.rc:root/ueventd.pico.rc \
     device/htc/pico/files/init.pico.usb.rc:root/init.pico.usb.rc \
     
+# Camera
+PRODUCT_COPY_FILES += \
+    vendor/htc/pico/proprietary/lib/hw/camera.default.so:system/lib/hw/camera.default.so \
+    vendor/htc/pico/proprietary/lib/liboemcamera.so:system/lib/liboemcamera.so \
+    vendor/htc/pico/proprietary/lib/libmmipl.so:system/lib/libmmipl.so \
+    vendor/htc/pico/proprietary/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
+    vendor/htc/pico/proprietary/lib/libcameraface.so:system/lib/libcameraface.so \
+    vendor/htc/pico/proprietary/lib/libcamerapp.so:system/lib/libcamerapp.so \
+    vendor/htc/pico/proprietary/lib/libOlaEngine.so:system/lib/libOlaEngine.so \
+    vendor/htc/pico/proprietary/lib/libchromatix_mt9t013_default_video.so:system/lib/libchromatix_mt9t013_default_video.so \
+    vendor/htc/pico/proprietary/lib/libchromatix_mt9t013_preview.so:system/lib/libchromatix_mt9t013_preview.so \
+    vendor/htc/pico/proprietary/bin/awb_camera:system/bin/awb_camera \
+    vendor/htc/pico/proprietary/bin/lsc_camera:system/bin/lsc_camera \
+    vendor/htc/pico/proprietary/bin/mm-qcamera-daemon:system/bin/mm-qcamera-daemon 
+    
+# OMX
+PRODUCT_COPY_FILES += \
+    vendor/htc/pico/proprietary/lib/libmm-adspsvc.so:system/lib/libmm-adspsvc.so \
+    vendor/htc/pico/proprietary/lib/libOmxH264Dec.so:system/lib/libOmxH264Dec.so \
+    vendor/htc/pico/proprietary/lib/libOmxMpeg4Dec.so:system/lib/libOmxMpeg4Dec.so \
+    vendor/htc/pico/proprietary/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so 
+    
 # Set usb type
 ADDITIONAL_DEFAULT_PROPERTIES += \
     persist.sys.usb.config=mass_storage \
     persist.service.adb.enable=1
+
+$(call inherit-product, build/target/product/full.mk)
+DEVICE_PACKAGE_OVERLAYS += device/htc/pico/overlay
 
 # Publish that we support the live wallpaper feature.
 PRODUCT_COPY_FILES += \
@@ -97,9 +119,16 @@ PRODUCT_COPY_FILES += \
     VisualizationWallpapers \
     librs_jni
 
+# Releasetools
+PRODUCT_COPY_FILES += \
+     device/htc/pico/releasetools/extras.sh:system/bin/extras.sh
+
 # Vold 
 PRODUCT_COPY_FILES += \
     device/htc/pico/files/etc/vold.fstab:system/etc/vold.fstab 
+
+# Prebuilt Binaries
+# Don't work on 4.0.4 because from 2.3.5! And we don't need this !
 
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
@@ -125,8 +154,8 @@ PRODUCT_COPY_FILES += \
     device/htc/pico/prebuilt/etc/AudioPara4.csv:system/etc/AudioPara4.csv \
     device/htc/pico/prebuilt/etc/AudioPara4_WB.csv:system/etc/AudioPara4_WB.csv \
     device/htc/pico/prebuilt/etc/AudioPreProcess.csv:system/etc/AudioPreProcess.csv \
-    device/htc/pico/prebuilt/lib/libaudioeq.so:system/lib/libaudioeq.so \
-    device/htc/pico/prebuilt/lib/libhtc_acoustic.so:system/lib/libhtc_acoustic.so \
+    vendor/htc/pico/proprietary/lib/libaudioeq.so:system/lib/libaudioeq.so \
+    vendor/htc/pico/proprietary/lib/libhtc_acoustic.so:system/lib/libhtc_acoustic.so \
 
 # Device permissions
 PRODUCT_COPY_FILES += \
@@ -144,11 +173,13 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/htc/pico/prebuilt/lib/hw/sensors.pico.so:system/lib/hw/sensors.pico.so \
     
+# GPS
+# Don't work on 4.0.4 because from 2.3.5! You need to compile it with yourself
+
 # 3D(ICS Blobs)
 PRODUCT_COPY_FILES += \
     vendor/htc/pico/proprietary/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
     vendor/htc/pico/proprietary/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
-    vendor/htc/pico/proprietary/lib/libC2D2.so:system/lib/libC2D2.so \
     vendor/htc/pico/proprietary/lib/libgsl.so:system/lib/libgsl.so \
     vendor/htc/pico/proprietary/lib/libOpenVG.so:system/lib/libOpenVG.so \
     vendor/htc/pico/proprietary/lib/libsc-a2xx.so:system/lib/libsc-a2xx.so \
@@ -158,10 +189,12 @@ PRODUCT_COPY_FILES += \
     vendor/htc/pico/proprietary/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so \
     vendor/htc/pico/proprietary/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so 
 
+
 # RIL
 PRODUCT_COPY_FILES += \
     vendor/htc/pico/proprietary/lib/libhtc_ril.so:system/lib/libhtc_ril.so \
- 
+    
+# Don't work on 4.0.4 because from 2.3.5! You need to compile it with yourself
 PRODUCT_COPY_FILES += \
     vendor/htc/pico/proprietary/etc/gps.conf:system/etc \
     vendor/htc/pico/proprietary/etc/spn-conf.xml:system/etc 
@@ -194,8 +227,10 @@ PRODUCT_COPY_FILES += \
     device/htc/pico/prebuilt/usr/keylayout/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl \
     device/htc/pico/prebuilt/usr/idc/himax-touchscreen.idc:system/usr/idc/himax-touchscreen.idc \
     device/htc/pico/prebuilt/usr/idc/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
-
+    
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.product.camera=pico \
+    debug.camcorder.disablemeta=1 \
     ro.com.google.locationfeatures=1 \
     ro.com.google.networklocation=1 \
     ro.com.google.gmsversion=2.3_r6 \
@@ -212,13 +247,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     media.stagefright.enable-http=true \
     media.stagefright.enable-aac=true \
     media.stagefright.enable-qcp=true
-
-# We have enough space to hold precise GC data
-PRODUCT_TAGS += dalvik.gc.type-precise
-
-# Set build date
-PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
     
 PRODUCT_AAPT_CONFIG := normal mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
-PRODUCT_NAME := pico
